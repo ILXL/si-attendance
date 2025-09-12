@@ -12,9 +12,11 @@ import sys
 load_dotenv()
 sheet = None
 try:
-    gc = pygsheets.authorize(service_account_json=os.environ.get("CREDS_JSON"))  # load Google API Client
+    gc = pygsheets.authorize(
+        service_account_json=os.environ.get("CREDS_JSON")
+    )  # load Google API Client
     sheet = gc.open("si-attendance-log")[0]
-    print('connected to sheet.')
+    print("connected to sheet.")
 except Exception as e:
     print("Error: Failed to Connect to Google Sheet!")
     print("Error was: ", e)
@@ -52,6 +54,8 @@ class Attendance:
 
         self._auth_token = self._getAuthToken()
         self._mintCampusSessionID(self._campus_session, self._auth_token)
+
+        self._course_needle = r"(?<=here for ).*?(?=\s)"
 
     def _getAuthToken(self):
         _url = "https://fullerton.campus.eab.com:443/tutor_kiosk/student_session/new"
@@ -97,14 +101,13 @@ class Attendance:
         if type(response) == dict:
             return {"errmessage": "Invalid CWID"}
         content = str(response.content)
-        needle = '((?<=Click here to choose: )\w*-\d+[a-zA-z]*(-\d+)*.+?(?=\(|"))'
-        courses = re.findall(needle, content)
+        courses = re.findall(self._course_needle, content)
         return json.dumps(courses)
 
     def _selectCourse(self, content, course_selection):
-        needle = r"(?<=Click here to choose: ).*?\d+[A-Za-z]*(?=-)"
-        course_matches = [m for m in re.finditer(needle, content)]
+        course_matches = [m for m in re.finditer(self._course_needle, content)]
         course_options = [content[m.start() : m.end()].strip() for m in course_matches]
+        print(f"{course_options = }")
 
         specific = course_selection[-1] == "$"
         course_selection = course_selection[:-1] if specific else course_selection
