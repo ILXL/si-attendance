@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "build": "rollup -c",
+    "build": "rollup -c && npm run copy",
+    "copy": "rm -rf ../static/build && cp -r public/build ../static/ && cp public/index.html public/global.css public/favicon.png ../static/",
     "dev": "rollup -c -w",
     "start": "sirv public --no-clear"
   },
