@@ -1,12 +1,19 @@
 {
     "version": 2,
+    "buildCommand": "echo 'Build complete'",
+    "outputDirectory": ".",
     "builds": [
         {
             "src": "src/index.py",
             "use": "@vercel/python",
             "config": {
                 "maxLambdaSize": "50mb",
-                "includeFiles": "src/frontend/**"
+                "includeFiles": [
+                    "src/frontend/public/**",
+                    "src/attendance.py",
+                    "src/utils.py",
+                    "src/requirements.txt"
+                ]
             }
         }
     ],

@@ -10,28 +10,27 @@ from attendance import Attendance
 from flask_cors import CORS
 
 # Configure Flask with static folder for frontend
-# On Vercel: Flask runs from /var/task/index.py, frontend should be at /var/task/frontend/public
-# Locally: Flask runs from src/index.py, frontend should be at src/frontend/public
+# On Vercel, Vercel flattens src/ so index.py ends up at /var/task/index.py
+# But with includeFiles, the frontend should be at /var/task/src/frontend/public
+# Locally, index.py is at src/index.py and frontend is at src/frontend/public
+
 current_dir = os.path.dirname(os.path.abspath(__file__))
 current_file = os.path.abspath(__file__)
 
-# Start with path relative to this file
+# Try 1: Same directory (local: src/ or Vercel if structure is preserved)
 frontend_path = os.path.join(current_dir, 'frontend', 'public')
 
-# If we're at /var/task (Vercel), check /var/task/frontend/public
-if current_dir == '/var/task' and not os.path.exists(frontend_path):
-    frontend_path = '/var/task/frontend/public'
+# Try 2: If in /var/task, look for src/frontend
+if not os.path.exists(frontend_path) and current_dir == '/var/task':
+    frontend_path = '/var/task/src/frontend/public'
 
-# Try parent directory
+# Try 3: Parent directory paths
 if not os.path.exists(frontend_path):
     parent = os.path.dirname(current_dir)
-    alt_paths = [
-        os.path.join(parent, 'frontend', 'public'),
-        os.path.join(parent, 'src', 'frontend', 'public'),
-    ]
-    for path in alt_paths:
-        if os.path.exists(path):
-            frontend_path = path
+    for subpath in ['frontend', 'src/frontend']:
+        test_path = os.path.join(parent, subpath, 'public')
+        if os.path.exists(test_path):
+            frontend_path = test_path
             break
 
 app = Flask(__name__, static_folder=frontend_path, static_url_path='')
