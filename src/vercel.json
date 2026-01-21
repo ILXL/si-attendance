@@ -1,12 +1,12 @@
 {
     "version": 2,
+    "public": "public",
     "builds": [
         {
             "src": "index.py",
             "use": "@vercel/python",
             "config": {
-                "maxLambdaSize": "50mb",
-                "includeFiles": ["frontend/**", "*.py"]
+                "maxLambdaSize": "50mb"
             }
         }
     ],
@@ -24,8 +24,12 @@
             "dest": "index.py"
         },
         {
-            "src": "/(.*)",
+            "src": "/debug",
             "dest": "index.py"
+        },
+        {
+            "src": "/(.*)",
+            "dest": "/index.html"
         }
     ]
 }

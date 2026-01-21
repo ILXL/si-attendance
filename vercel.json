@@ -3,30 +3,29 @@
     "public": "public",
     "builds": [
         {
-            "src": "src/index.py",
+            "src": "index.py",
             "use": "@vercel/python",
             "config": {
-                "maxLambdaSize": "50mb",
-                "includeFiles": "public/**"
+                "maxLambdaSize": "50mb"
             }
         }
     ],
     "routes": [
         {
             "src": "/signin",
-            "dest": "src/index.py"
+            "dest": "index.py"
         },
         {
             "src": "/getcourses",
-            "dest": "src/index.py"
+            "dest": "index.py"
         },
         {
             "src": "/noncwidsignin",
-            "dest": "src/index.py"
+            "dest": "index.py"
         },
         {
             "src": "/debug",
-            "dest": "src/index.py"
+            "dest": "index.py"
         },
         {
             "src": "/(.*)",
