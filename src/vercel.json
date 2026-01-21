@@ -2,14 +2,30 @@
     "version": 2,
     "builds": [
         {
-            "src": "./index.py",
-            "use": "@vercel/python"
+            "src": "index.py",
+            "use": "@vercel/python",
+            "config": {
+                "maxLambdaSize": "50mb",
+                "includeFiles": ["frontend/**", "*.py"]
+            }
         }
     ],
     "routes": [
         {
+            "src": "/signin",
+            "dest": "index.py"
+        },
+        {
+            "src": "/getcourses",
+            "dest": "index.py"
+        },
+        {
+            "src": "/noncwidsignin",
+            "dest": "index.py"
+        },
+        {
             "src": "/(.*)",
-            "dest": "/"
+            "dest": "index.py"
         }
     ]
 }

@@ -1,16 +1,21 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 from flask_restful import Resource, Api
+import os
+import sys
+
+# Ensure src directory is in Python path for imports
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
 from attendance import Attendance
 from flask_cors import CORS
 
-app = Flask(__name__)
+# Configure Flask with static folder for frontend
+frontend_path = os.path.join(os.path.dirname(__file__), 'frontend', 'public')
+app = Flask(__name__, static_folder=frontend_path, static_url_path='')
+app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
+
 CORS(app, resources={r"*": {"origins": "*"}})
 api = Api(app)
-
-
-class HelloWorld(Resource):
-    def get(self):
-        return {"Hello": "World2"}
 
 
 class GetCourses(Resource):
@@ -65,6 +70,26 @@ class LogNonCWIDToSheet(Resource):
 
 
 api.add_resource(SignIn, "/signin")
-api.add_resource(HelloWorld, "/")
 api.add_resource(GetCourses, "/getcourses")
 api.add_resource(LogNonCWIDToSheet, "/noncwidsignin")
+
+# Frontend static file serving
+@app.route('/', defaults={'path': ''})
+@app.route('/<path:path>')
+def serve_spa(path):
+    # Don't intercept API routes
+    if path.startswith('signin') or path.startswith('getcourses') or path.startswith('noncwidsignin'):
+        return {"error": "Not Found"}, 404
+    
+    # Try to serve files (CSS, JS, images, etc.) 
+    if '.' in path:
+        try:
+            return send_from_directory(app.static_folder, path)
+        except:
+            pass
+    
+    # Serve index.html for all routes (SPA routing)
+    try:
+        return send_from_directory(app.static_folder, 'index.html')
+    except Exception as e:
+        return {"error": f"Could not find index.html: {str(e)}", "static_folder": app.static_folder}, 500
