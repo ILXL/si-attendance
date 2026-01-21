@@ -10,9 +10,12 @@ from attendance import Attendance
 from flask_cors import CORS
 
 # Configure Flask
-# On Vercel: Frontend is served by Vercel's static handler from /public directory
-# Locally: We can serve from src/frontend/public for development
-app = Flask(__name__)
+# Serve static files from public/ directory
+# On Vercel, public/ will be in /var/task/public
+current_dir = os.path.dirname(os.path.abspath(__file__))
+public_dir = os.path.join(current_dir, 'public')
+
+app = Flask(__name__, static_folder=public_dir, static_url_path='/')
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 
 CORS(app, resources={r"*": {"origins": "*"}})
@@ -100,5 +103,15 @@ def serve_spa(path):
     if path.startswith('signin') or path.startswith('getcourses') or path.startswith('noncwidsignin') or path.startswith('debug'):
         return {"error": "Not Found"}, 404
     
-    # For any other route, return a message (Vercel will serve index.html for / and other static files)
-    return {"message": "Use API endpoints: /signin, /getcourses, /noncwidsignin"}
+    # Try to serve static files (images, CSS, JS)
+    if '.' in path:
+        try:
+            return send_from_directory(app.static_folder, path)
+        except:
+            pass
+    
+    # For SPA, serve index.html for all non-API routes
+    try:
+        return send_from_directory(app.static_folder, 'index.html')
+    except Exception as e:
+        return {"error": f"Could not find index.html: {str(e)}", "public_folder": app.static_folder, "public_exists": os.path.exists(app.static_folder)}, 500

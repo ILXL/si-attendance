@@ -1,15 +1,10 @@
 {
     "version": 2,
-    "public": "public",
+    "public": ".",
     "builds": [
         {
             "src": "index.py",
-            "use": "@vercel/python",
-            "config": {
-                "maxLambdaSize": "50mb",
-                "includeFiles": "public/**",
-                "excludeFiles": "**/*.map"
-            }
+            "use": "@vercel/python"
         }
     ],
     "routes": [
@@ -31,7 +26,7 @@
         },
         {
             "src": "/(.*)",
-            "dest": "/index.html"
+            "dest": "index.py"
         }
     ]
 }
