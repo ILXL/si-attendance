@@ -7,13 +7,12 @@
             "use": "@vercel/python",
             "config": {
                 "includeFiles": [
-                    "public/index.html",
-                    "public/global.css",
-                    "public/favicon.png",
-                    "public/build/bundle.js",
-                    "public/build/bundle.css",
-                    "public/build/bundle.js.map",
-                    "public/build/.gitkeep"
+                    "index.html",
+                    "global.css",
+                    "favicon.png",
+                    "build/bundle.js",
+                    "build/bundle.css",
+                    "build/bundle.js.map"
                 ]
             }
         }
