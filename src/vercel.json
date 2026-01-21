@@ -4,7 +4,18 @@
     "builds": [
         {
             "src": "index.py",
-            "use": "@vercel/python"
+            "use": "@vercel/python",
+            "config": {
+                "includeFiles": [
+                    "public/index.html",
+                    "public/global.css",
+                    "public/favicon.png",
+                    "public/build/bundle.js",
+                    "public/build/bundle.css",
+                    "public/build/bundle.js.map",
+                    "public/build/.gitkeep"
+                ]
+            }
         }
     ],
     "routes": [

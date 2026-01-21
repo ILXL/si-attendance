@@ -1,0 +1,3 @@
+# Force include public directory
+!public
+!public/**
