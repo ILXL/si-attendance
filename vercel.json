@@ -1,20 +1,10 @@
 {
     "version": 2,
-    "buildCommand": "echo 'Build complete'",
-    "outputDirectory": ".",
+    "public": "public",
     "builds": [
         {
             "src": "src/index.py",
-            "use": "@vercel/python",
-            "config": {
-                "maxLambdaSize": "50mb",
-                "includeFiles": [
-                    "src/frontend/public/**",
-                    "src/attendance.py",
-                    "src/utils.py",
-                    "src/requirements.txt"
-                ]
-            }
+            "use": "@vercel/python"
         }
     ],
     "routes": [
@@ -31,7 +21,7 @@
             "dest": "src/index.py"
         },
         {
-            "src": "/(.*)",
+            "src": "/debug",
             "dest": "src/index.py"
         }
     ]

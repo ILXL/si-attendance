@@ -9,31 +9,10 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from attendance import Attendance
 from flask_cors import CORS
 
-# Configure Flask with static folder for frontend
-# On Vercel, Vercel flattens src/ so index.py ends up at /var/task/index.py
-# But with includeFiles, the frontend should be at /var/task/src/frontend/public
-# Locally, index.py is at src/index.py and frontend is at src/frontend/public
-
-current_dir = os.path.dirname(os.path.abspath(__file__))
-current_file = os.path.abspath(__file__)
-
-# Try 1: Same directory (local: src/ or Vercel if structure is preserved)
-frontend_path = os.path.join(current_dir, 'frontend', 'public')
-
-# Try 2: If in /var/task, look for src/frontend
-if not os.path.exists(frontend_path) and current_dir == '/var/task':
-    frontend_path = '/var/task/src/frontend/public'
-
-# Try 3: Parent directory paths
-if not os.path.exists(frontend_path):
-    parent = os.path.dirname(current_dir)
-    for subpath in ['frontend', 'src/frontend']:
-        test_path = os.path.join(parent, subpath, 'public')
-        if os.path.exists(test_path):
-            frontend_path = test_path
-            break
-
-app = Flask(__name__, static_folder=frontend_path, static_url_path='')
+# Configure Flask
+# On Vercel: Frontend is served by Vercel's static handler from /public directory
+# Locally: We can serve from src/frontend/public for development
+app = Flask(__name__)
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 
 CORS(app, resources={r"*": {"origins": "*"}})
@@ -99,31 +78,17 @@ api.add_resource(LogNonCWIDToSheet, "/noncwidsignin")
 @app.route('/debug')
 def debug():
     return {
-        "static_folder": app.static_folder,
-        "static_folder_exists": os.path.exists(app.static_folder),
-        "index_html_exists": os.path.exists(os.path.join(app.static_folder, 'index.html')),
-        "bundle_js_exists": os.path.exists(os.path.join(app.static_folder, 'build', 'bundle.js')),
-        "current_file": __file__,
-        "current_dir": os.path.dirname(os.path.abspath(__file__))
+        "app_root": app.root_path,
+        "message": "Frontend is served by Vercel static handler from /public directory. Flask handles /signin, /getcourses, /noncwidsignin, and /debug."
     }
 
-# Frontend static file serving
+# Minimal SPA fallback - Vercel handles static files, we just return JSON for API errors
 @app.route('/', defaults={'path': ''})
 @app.route('/<path:path>')
 def serve_spa(path):
     # Don't intercept API routes
-    if path.startswith('signin') or path.startswith('getcourses') or path.startswith('noncwidsignin'):
+    if path.startswith('signin') or path.startswith('getcourses') or path.startswith('noncwidsignin') or path.startswith('debug'):
         return {"error": "Not Found"}, 404
     
-    # Try to serve files (CSS, JS, images, etc.) 
-    if '.' in path:
-        try:
-            return send_from_directory(app.static_folder, path)
-        except:
-            pass
-    
-    # Serve index.html for all routes (SPA routing)
-    try:
-        return send_from_directory(app.static_folder, 'index.html')
-    except Exception as e:
-        return {"error": f"Could not find index.html: {str(e)}", "static_folder": app.static_folder}, 500
+    # For any other route, return a message (Vercel will serve index.html for / and other static files)
+    return {"message": "Use API endpoints: /signin, /getcourses, /noncwidsignin"}
