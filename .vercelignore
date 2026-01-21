@@ -1,0 +1,4 @@
+# Don't ignore frontend build files
+!src/frontend/public
+!src/frontend/public/build
+!src/frontend/public/build/**
