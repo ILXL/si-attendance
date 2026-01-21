@@ -77,9 +77,19 @@ api.add_resource(LogNonCWIDToSheet, "/noncwidsignin")
 # Debug endpoint
 @app.route('/debug')
 def debug():
+    import os
+    index_path = os.path.join(os.getcwd(), 'public', 'index.html')
+    bundle_path = os.path.join(os.getcwd(), 'public', 'build', 'bundle.js')
+    
     return {
         "app_root": app.root_path,
-        "message": "Frontend is served by Vercel static handler from /public directory. Flask handles /signin, /getcourses, /noncwidsignin, and /debug."
+        "cwd": os.getcwd(),
+        "index_html_exists": os.path.exists(index_path),
+        "index_html_path": index_path,
+        "bundle_js_exists": os.path.exists(bundle_path),
+        "bundle_js_path": bundle_path,
+        "public_dir_contents": os.listdir(os.path.join(os.getcwd(), 'public')) if os.path.exists(os.path.join(os.getcwd(), 'public')) else "NOT FOUND",
+        "message": "Frontend should be served by Vercel's catch-all route (/(.*) -> /index.html)"
     }
 
 # Minimal SPA fallback - Vercel handles static files, we just return JSON for API errors
