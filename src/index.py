@@ -10,11 +10,11 @@ from attendance import Attendance
 from flask_cors import CORS
 
 # Configure Flask
-# Serve static files from the same directory as this file
-# On Vercel: index.py is at /var/task/index.py, static files are at /var/task/
+# Serve static files from static/ subdirectory
 current_dir = os.path.dirname(os.path.abspath(__file__))
+static_dir = os.path.join(current_dir, 'static')
 
-app = Flask(__name__, static_folder=current_dir, static_url_path='/')
+app = Flask(__name__, static_folder=static_dir, static_url_path='/')
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 
 CORS(app, resources={r"*": {"origins": "*"}})
