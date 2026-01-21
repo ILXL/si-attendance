@@ -1,34 +1,31 @@
 {
     "version": 2,
-    "buildCommand": "mkdir -p api && cp src/index.py api/ && cp -r src/frontend api/",
     "builds": [
         {
-            "src": "api/index.py",
+            "src": "src/index.py",
             "use": "@vercel/python",
             "config": {
-                "maxLambdaSize": "50mb"
+                "maxLambdaSize": "50mb",
+                "includeFiles": "src/frontend/**"
             }
         }
     ],
-    "env": {
-        "FRONTEND_PATH": "frontend/public"
-    },
     "routes": [
         {
             "src": "/signin",
-            "dest": "api/index.py"
+            "dest": "src/index.py"
         },
         {
             "src": "/getcourses",
-            "dest": "api/index.py"
+            "dest": "src/index.py"
         },
         {
             "src": "/noncwidsignin",
-            "dest": "api/index.py"
+            "dest": "src/index.py"
         },
         {
             "src": "/(.*)",
-            "dest": "api/index.py"
+            "dest": "src/index.py"
         }
     ]
 }

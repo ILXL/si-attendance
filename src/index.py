@@ -10,14 +10,20 @@ from attendance import Attendance
 from flask_cors import CORS
 
 # Configure Flask with static folder for frontend
-# On Vercel: index.py is at /var/task/api/index.py, frontend is at /var/task/api/frontend/public
-# Locally: index.py is at src/index.py, frontend is at src/frontend/public
+# On Vercel: Flask runs from /var/task/index.py, frontend should be at /var/task/frontend/public
+# Locally: Flask runs from src/index.py, frontend should be at src/frontend/public
 current_dir = os.path.dirname(os.path.abspath(__file__))
+current_file = os.path.abspath(__file__)
+
+# Start with path relative to this file
 frontend_path = os.path.join(current_dir, 'frontend', 'public')
 
-# If not found in same directory, it might be in a parent directory structure
+# If we're at /var/task (Vercel), check /var/task/frontend/public
+if current_dir == '/var/task' and not os.path.exists(frontend_path):
+    frontend_path = '/var/task/frontend/public'
+
+# Try parent directory
 if not os.path.exists(frontend_path):
-    # Try going up one level and into a different path structure
     parent = os.path.dirname(current_dir)
     alt_paths = [
         os.path.join(parent, 'frontend', 'public'),
