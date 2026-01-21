@@ -10,7 +10,27 @@ from attendance import Attendance
 from flask_cors import CORS
 
 # Configure Flask with static folder for frontend
-frontend_path = os.path.join(os.path.dirname(__file__), 'frontend', 'public')
+# Try multiple paths to handle both local and Vercel deployments
+current_dir = os.path.dirname(os.path.abspath(__file__))
+current_file = os.path.abspath(__file__)
+
+# Primary path: relative to this file
+frontend_path = os.path.join(current_dir, 'frontend', 'public')
+
+# If not found, try looking up and then down into src/
+if not os.path.exists(frontend_path):
+    parent_dir = os.path.dirname(current_dir)
+    alt_path = os.path.join(parent_dir, 'src', 'frontend', 'public')
+    if os.path.exists(alt_path):
+        frontend_path = alt_path
+
+# Last resort: search from root /var/task
+if not os.path.exists(frontend_path):
+    if os.path.exists('/var/task/src/frontend/public'):
+        frontend_path = '/var/task/src/frontend/public'
+    elif os.path.exists('/var/task/frontend/public'):
+        frontend_path = '/var/task/frontend/public'
+
 app = Flask(__name__, static_folder=frontend_path, static_url_path='')
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 
@@ -72,6 +92,18 @@ class LogNonCWIDToSheet(Resource):
 api.add_resource(SignIn, "/signin")
 api.add_resource(GetCourses, "/getcourses")
 api.add_resource(LogNonCWIDToSheet, "/noncwidsignin")
+
+# Debug endpoint
+@app.route('/debug')
+def debug():
+    return {
+        "static_folder": app.static_folder,
+        "static_folder_exists": os.path.exists(app.static_folder),
+        "index_html_exists": os.path.exists(os.path.join(app.static_folder, 'index.html')),
+        "bundle_js_exists": os.path.exists(os.path.join(app.static_folder, 'build', 'bundle.js')),
+        "current_file": __file__,
+        "current_dir": os.path.dirname(os.path.abspath(__file__))
+    }
 
 # Frontend static file serving
 @app.route('/', defaults={'path': ''})
