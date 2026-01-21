@@ -10,26 +10,23 @@ from attendance import Attendance
 from flask_cors import CORS
 
 # Configure Flask with static folder for frontend
-# Try multiple paths to handle both local and Vercel deployments
+# On Vercel: index.py is at /var/task/api/index.py, frontend is at /var/task/api/frontend/public
+# Locally: index.py is at src/index.py, frontend is at src/frontend/public
 current_dir = os.path.dirname(os.path.abspath(__file__))
-current_file = os.path.abspath(__file__)
-
-# Primary path: relative to this file
 frontend_path = os.path.join(current_dir, 'frontend', 'public')
 
-# If not found, try looking up and then down into src/
+# If not found in same directory, it might be in a parent directory structure
 if not os.path.exists(frontend_path):
-    parent_dir = os.path.dirname(current_dir)
-    alt_path = os.path.join(parent_dir, 'src', 'frontend', 'public')
-    if os.path.exists(alt_path):
-        frontend_path = alt_path
-
-# Last resort: search from root /var/task
-if not os.path.exists(frontend_path):
-    if os.path.exists('/var/task/src/frontend/public'):
-        frontend_path = '/var/task/src/frontend/public'
-    elif os.path.exists('/var/task/frontend/public'):
-        frontend_path = '/var/task/frontend/public'
+    # Try going up one level and into a different path structure
+    parent = os.path.dirname(current_dir)
+    alt_paths = [
+        os.path.join(parent, 'frontend', 'public'),
+        os.path.join(parent, 'src', 'frontend', 'public'),
+    ]
+    for path in alt_paths:
+        if os.path.exists(path):
+            frontend_path = path
+            break
 
 app = Flask(__name__, static_folder=frontend_path, static_url_path='')
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
